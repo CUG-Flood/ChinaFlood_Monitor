@@ -1,0 +1,127 @@
+```{julia}
+using JSServe, Observables
+src = """
+(() => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext('2d');
+    const width = 500
+    const height = 400
+    canvas.width = width;
+    canvas.height = height;
+    const gradient = context.createRadialGradient(200, 200, 0, 200, 200, 200);
+    gradient.addColorStop("0", "magenta");
+    gradient.addColorStop(".25", "blue");
+    gradient.addColorStop(".50", "green");
+    gradient.addColorStop(".75", "yellow");
+    gradient.addColorStop("1.0", "red");
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, height);
+    return canvas;
+})();
+"""
+App() do session::Session
+    editor = CodeEditor("javascript"; initial_source=src, width=800, height=300)
+    eval_button = Button("eval")
+    output = DOM.div(DOM.span())
+    JSServe.onjs(session, eval_button.value, js"""function (click){
+        const js_src = $(editor.onchange).value;
+        const result = new Function("return " + (js_src))()
+        let dom;
+        if (typeof result === 'object' && result.nodeName) {
+            dom = result
+        } else {
+            const span = document.createElement("span")
+            span.innerText = result;
+            dom = span
+        }
+        JSServe.update_or_replace($(output), dom, false);
+        return
+    }
+    """)
+
+    notify(eval_button.value)
+    return DOM.div(editor, eval_button, output)
+end
+```
+
+
+```{julia}
+import JSServe.TailwindDashboard as D
+
+function create_svg(sl_nsamples, sl_sample_step, sl_phase, sl_radii, color)
+    width, height = 900, 300
+    cxs_unscaled = [i*sl_sample_step + sl_phase for i in 1:sl_nsamples]
+    cys = sin.(cxs_unscaled) .* height/3 .+ height/2
+    cxs = cxs_unscaled .* width/4pi
+    rr = sl_radii
+    # DOM.div/svg/etc is just a convenience in JSServe for using Hyperscript, but circle isn't wrapped like that yet
+    geom = [SVG.circle(cx=cxs[i], cy=cys[i], r=rr, fill=color(i)) for i in 1:sl_nsamples[]]
+    return SVG.svg(SVG.g(geom...);
+        width=width, height=height
+    )
+end
+
+app = App() do session
+    colors = ["black", "gray", "silver", "maroon", "red", "olive", "yellow", "green", "lime", "teal", "aqua", "navy", "blue", "purple", "fuchsia"]
+    color(i) = colors[i%length(colors)+1]
+    sl_nsamples = D.Slider("nsamples", 1:200, value=100)
+    sl_sample_step = D.Slider("sample step", 0.01:0.01:1.0, value=0.1)
+    sl_phase = D.Slider("phase", 0.0:0.1:6.0, value=0.0)
+    sl_radii = D.Slider("radii", 0.1:0.1:60, value=10.0)
+    svg = map(create_svg, sl_nsamples.value, sl_sample_step.value, sl_phase.value, sl_radii.value, color)
+
+    return DOM.div(D.FlexRow(D.FlexCol(sl_nsamples, sl_sample_step, sl_phase, sl_radii), svg))
+end
+```
+
+
+
+```{julia}
+using JSServe
+using WGLMakie
+import WGLMakie as W
+import Plots as P
+import PlotlyLight as PL
+import JSServe.TailwindDashboard as D
+
+Page()
+
+function makie_plot()
+  N = 60
+  function xy_data(x, y)
+    r = sqrt(x^2 + y^2)
+    r == 0.0 ? 1.0f0 : (sin(r) / r)
+  end
+  l = range(-10, stop=10, length=N)
+  z = Float32[xy_data(x, y) for x in l, y in l]
+  W.surface(
+    -1 .. 1, -1 .. 1, z,
+    colormap=:Spectral,
+    figure=(; resolution=(500, 500))
+  )
+end
+
+# As far as I can tell, PlotlyLight doesn't handle require inside documenter correctly
+# So we just use JSServe to do it correctly via `Asset`:
+const Plotly = JSServe.Asset(PL.cdn_url)
+
+function JSServe.jsrender(session::Session, plot::PL.Plot)
+  # Pretty much copied from the PlotlyLight source to create the JS + div for creating the plot:
+  div = DOM.div(DOM.div(id=plot.id, style="width: 100%; height: 100%"), id="parent-of-$(plot.id)"; style="width: 400px; height: 300px")
+  src = js"""
+      Plotly.newPlot($(plot.id), $(plot.data), $(plot.layout), $(plot.config))
+  """
+  return JSServe.jsrender(session, DOM.div(Plotly, div, src))
+end
+
+App() do
+  p = PL.Plot(x=1:20, y=cumsum(randn(20)), type="scatter", mode="lines+markers")
+  width = "400px"
+  return D.FlexRow(
+    D.Card(P.scatter(1:4; windowsize=(200, 200)); width),
+    D.Card(p; width),
+    D.Card(makie_plot()); width)
+end
+```
+
+shiny的方案，更加成熟一些，leaflet可以直接使用；
