@@ -24,3 +24,7 @@ tbl_copy <- function(con, tbl, tbl_name = NULL, overwrite = TRUE) {
   if (is.null(tbl_name)) tbl_name = deparse(substitute(tbl))
   DBI::dbWriteTable(con, tbl_name, tbl, overwrite = overwrite)
 }
+
+db_append <- function(con, tbl, values) {
+  dbWriteTable(con, tbl, values, append = TRUE)
+}
