@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 # %%
 # https://stackoverflow.com/questions/1907993/autoreload-of-modules-in-ipython
+# https://stackoverflow.com/questions/16780014/import-file-from-parent-directory
 %load_ext autoreload
 %autoreload 2
+
+import os, sys
+sys.path.append(os.path.abspath("src/database"))
+
 # %reload_ext autoreload
 from tidydb import *
 
@@ -14,6 +19,7 @@ con = db_open(dbinfo)
 con
 
 # %%
+
 """
 Created on Sat Sep 16 00:20:27 2023
 

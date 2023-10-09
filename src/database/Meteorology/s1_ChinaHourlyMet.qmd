@@ -1,0 +1,35 @@
+```{r}
+#! /usr/bin/Rscript --no-init-file
+# Dongdong Kong ----------------------------------------------------------------
+# Copyright (c) 2022 Dongdong Kong. All rights reserved.
+source('src/database/Meteorology/main_pkgs.R')
+```
+
+## 登录数据库
+```{r}
+config = yaml::read_yaml("env/db_userinfo.yml")
+dbinfo = config$JiaYing
+dbinfo = config$Kong
+```
+
+```{r}
+con = db_open(dbinfo, 1)
+con
+```
+
+## 站点信息
+
+```{r}
+tbl_copy(con, st_met2481, "st_hourly_met", overwrite = TRUE)
+mtcars2 <- tbl(con, "st_hourly_met")
+```
+
+## 测试数据拼接
+
+```{r}
+
+```
+
+```{r}
+tbl_copy(con, mtcars)
+```
