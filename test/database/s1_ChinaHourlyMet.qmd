@@ -6,10 +6,9 @@
 
 ## 登录数据库
 ```{r}
-source('scripts/main_pkgs.R')
-
+library(Ipaper)
+# source('scripts/main_pkgs.R')
 config = yaml::read_yaml("env/db_userinfo.yml")
-dbinfo = config$JiaYing
 dbinfo = config$Kong
 
 con = open_mysql(dbinfo, 1)
@@ -17,29 +16,32 @@ con
 ```
 
 ```{r}
-# copy_to(con, st_met2481, "temp")
-table = tbl(con, "temp")
+copy_to(con, mtcars, overwrite=TRUE, indexes=c("cyl"))
+table = tbl(con, "mtcars")
 data = collect(table)[1:10, ]
 
 rows_append(table, data, copy=TRUE)
+rows_append(table, data, copy=TRUE, in_place=TRUE)
 ```
 
 ## 分析数据
 
-## 测试数据拼接
-
+> 站点的索引可以发挥很大作用
 ```{r}
-# tbl_copy(con, d, "temp", overwrite = TRUE)
-# temp = d
-tbl_copy(con, d, "temp", overwrite = TRUE)
-
-news = copy_inline(con, d)
-tbl = tbl(con, "temp")
-
-rows_append(tbl, news, in_place=TRUE) #|> show_query()
-# tbl(con, "China_Mete2000_daily_2019_2022")
-
-db_append(con, "temp", d)
+system.time({
+  d = table |> filter(site==50136)
+  collect(d)
+})
+  #  user  system elapsed
+  #  0.00    0.01    0.28
 ```
 
-## 创建新表
+> 测试日期的索引
+```{r}
+date0 = make_date(2020)
+system.time({
+  # d = table |> filter(date==date0)
+  d = table |> filter(year==2020L, month==1L, day==1L)
+  collect(d)
+})
+```

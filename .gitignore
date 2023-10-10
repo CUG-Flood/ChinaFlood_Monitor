@@ -3,3 +3,5 @@ Manifest.toml
 *.pyc
 *.yml
 .Rproj.user
+
+man

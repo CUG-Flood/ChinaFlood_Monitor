@@ -1,7 +1,8 @@
 library(dbplyr)
 library(DBI)
 library(RMySQL)
-# library(dplyr)
+library(crayon)
+library(dplyr)
 # library(Ipaper)
 # library(data.table)
 # library(tidymet)
@@ -20,12 +21,11 @@ setMethod("dbSendQuery", c("MySQLConnection", "character"),
 #' @import RMySQL
 open_mysql <- function(dbinfo, dbname=1) {
   if (is.numeric(dbname)) dbname = dbinfo$dbname[dbname]  
-  bold(ok(sprintf("[info] opening db: %s", dbname)))
+  bold(Ipaper::ok(sprintf("[info] opening db: %s", dbname)))
 
   dev = RMySQL::MySQL()
   # dev = odbc::odbc()
   # odbc::odbcListDrivers()
-  # dev = RMariaDB::MariaDB()
   con <- dbConnect(dev, 
     # driver = "MySQL ODBC 8.1 ANSI Driver",
     host=dbinfo$host, 
@@ -43,6 +43,7 @@ open_mariadb <- function(dbinfo, dbname=1) {
   # odbc::odbcListDrivers()
   dev = RMariaDB::MariaDB()
   con <- dbConnect(dev, 
+    load_data_local_infile = TRUE,
     host=dbinfo$host, 
     user=dbinfo$user, 
     password=as.character(dbinfo$pwd), 
