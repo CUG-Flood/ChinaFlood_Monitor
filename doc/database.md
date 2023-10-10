@@ -21,7 +21,6 @@ sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
 ## 注释掉下面
 # bind-address            = 0.0.0.0
 # mysqlx-bind-address     = 0.0.0.0
-
 ```
 
 <!-- # sudo ufw allow 3306
@@ -55,3 +54,5 @@ FLUSH PRIVILEGES;
 -- 用户列表
 SELECT user, host FROM mysql.user;
 ```
+
+# 3. VSCode登陆

@@ -1,0 +1,45 @@
+```{r}
+#! /usr/bin/Rscript --no-init-file
+# Dongdong Kong ----------------------------------------------------------------
+# Copyright (c) 2022 Dongdong Kong. All rights reserved.
+```
+
+## 登录数据库
+```{r}
+source('scripts/main_pkgs.R')
+
+config = yaml::read_yaml("env/db_userinfo.yml")
+dbinfo = config$JiaYing
+dbinfo = config$Kong
+
+con = open_mysql(dbinfo, 1)
+con
+```
+
+```{r}
+# copy_to(con, st_met2481, "temp")
+table = tbl(con, "temp")
+data = collect(table)[1:10, ]
+
+rows_append(table, data, copy=TRUE)
+```
+
+## 分析数据
+
+## 测试数据拼接
+
+```{r}
+# tbl_copy(con, d, "temp", overwrite = TRUE)
+# temp = d
+tbl_copy(con, d, "temp", overwrite = TRUE)
+
+news = copy_inline(con, d)
+tbl = tbl(con, "temp")
+
+rows_append(tbl, news, in_place=TRUE) #|> show_query()
+# tbl(con, "China_Mete2000_daily_2019_2022")
+
+db_append(con, "temp", d)
+```
+
+## 创建新表
