@@ -93,3 +93,29 @@ dbRemoveTables_like <- function(con, pattern="dbplyr", del=TRUE) {
   }
   tbls_bad
 }
+
+
+import_table_large <- function(df, table, chunksize=1e6) {
+  n = nrow(df)
+  # chunksize = 1e6
+  chunks = ceiling(n/chunksize)
+  fprintf("chunks = %d\n", chunks)
+
+  for (i in 1:chunks) {
+    fout = sprintf("%s_chunk%02d", table, i)
+    ok(fprintf("running %s \n", fout))
+
+    i_beg = (i-1)*chunksize + 1
+    i_end = pmin(i*chunksize, n)
+    d = df[i_beg:i_end, ]
+
+    t = system.time({
+      # if (i == 1) {
+        copy_to(con, d, fout, overwrite = TRUE, temporary = FALSE)
+      # } else {
+      #   copy_to(con, d, table, append = TRUE, temporary = FALSE)
+      # }
+    })
+    print(t)
+  }
+}
