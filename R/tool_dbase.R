@@ -26,9 +26,12 @@ open_mysql <- function(dbinfo, dbname=1) {
   dev = RMySQL::MySQL()
   # dev = odbc::odbc()
   # odbc::odbcListDrivers()
+  port = 3306
+  if (!is.null(dbinfo$port)) port = dbinfo$port
+
   con <- dbConnect(dev, 
     # driver = "MySQL ODBC 8.1 ANSI Driver",
-    host=dbinfo$host, 
+    host=dbinfo$host, port = port,
     user=dbinfo$user, 
     password=as.character(dbinfo$pwd), 
     dbname = dbname)
@@ -42,9 +45,12 @@ open_mariadb <- function(dbinfo, dbname=1) {
   # dev = odbc::odbc()
   # odbc::odbcListDrivers()
   dev = RMariaDB::MariaDB()
+  port = 3306
+  if (!is.null(dbinfo$port)) port = dbinfo$port
+
   con <- dbConnect(dev, 
     load_data_local_infile = TRUE,
-    host=dbinfo$host, 
+    host=dbinfo$host, port = port,
     user=dbinfo$user, 
     password=as.character(dbinfo$pwd), 
     database = dbname, 

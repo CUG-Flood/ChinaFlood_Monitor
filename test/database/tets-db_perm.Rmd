@@ -6,14 +6,35 @@
 
 ## 登录数据库
 ```{r}
+devtools::load_all()
 library(Ipaper)
+library(tidymet)
+
 # source('scripts/main_pkgs.R')
 config = yaml::read_yaml("env/db_userinfo.yml")
 dbinfo = config$Kong
 
-con = open_mysql(dbinfo, 1)
-con
+con_mysql = open_mysql(dbinfo, 1)
+con_mariadb = open_mariadb(dbinfo, 1)
+# con
 ```
+
+## 测试基础命令
+
+```{r}
+
+# st_met2481 = readxl::read_xlsx("st_met2481.xlsx")
+# , indexes=c("site")
+# , indexes=c("site")
+system.time({
+  copy_to(con_mysql, df, "temp01", overwrite=TRUE)
+})
+
+system.time({
+  copy_to(con_mariadb, df, "temp02", overwrite=TRUE)
+})
+```
+
 
 ```{r}
 copy_to(con, mtcars, overwrite=TRUE, indexes=c("cyl"))
@@ -24,7 +45,7 @@ rows_append(table, data, copy=TRUE)
 rows_append(table, data, copy=TRUE, in_place=TRUE)
 ```
 
-## 分析数据
+## 测试索引
 
 > 站点的索引可以发挥很大作用
 ```{r}

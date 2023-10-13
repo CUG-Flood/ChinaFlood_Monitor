@@ -1,0 +1,62 @@
+```{r}
+devtools::load_all()
+library(Ipaper)
+library(data.table)
+library(dplyr)
+library(lubridate)
+```
+
+## 加载和检查数据
+```{r}
+f = "Z:/DATA/China/2400climate data/ChinaMeteDaily_SURF_CLI_CHN_MUL_DAY_[195101,202003]_processed.csv"
+df = fread(f)
+
+data = select(df, -starts_with("QC"), -`Prcp_20-08`, -`Prcp_02-20`) |> 
+  rename(Prcp = `Prcp_20-20`) |> 
+  mutate(year=year(date), month=month(date), day=day(date), .after="date")
+
+data[, `:=`(
+  year = as.integer(year),
+  month = as.integer(month)
+)]
+
+d = data[year < 1960, ]
+# summary(select(data, -(1:2)))
+```
+
+```{r}
+# EVP_sm, EVP_bg, Prcp, 存在bug
+## 存在可疑数据
+data[Prcp >= 5000, ]
+data[EVP_bg >= 500, ]
+data[EVP_sm >= 500, ]
+```
+
+## 导入数据库
+
+```{r}
+# source('scripts/main_pkgs.R')
+config = yaml::read_yaml("env/db_userinfo.yml")
+dbinfo = config$nas
+con_mysql = open_mysql(dbinfo, 1)
+con_mariadb = open_mariadb(dbinfo, 1)
+con = con_mariadb
+```
+
+```{r}
+# indexes=c("site", "date", "year", "month", "day")
+system.time(
+  copy_to(con_mariadb, data, "China_Mete2000_daily_1951_2019", 
+    overwrite=TRUE, temporary = FALSE)
+)
+```
+
+```{r}
+system.time(
+  copy_to(con_mysql, d[1:1e6], "temp2", overwrite=TRUE, temporary = FALSE)
+)
+```
+
+```{r}
+copy_to(con_mariadb, st_met2481, "st_met2481_daily", overwrite = TRUE, temporary = FALSE)
+```

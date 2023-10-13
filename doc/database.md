@@ -53,6 +53,9 @@ FLUSH PRIVILEGES;
 
 -- 用户列表
 SELECT user, host FROM mysql.user;
+
+-- https://stackoverflow.com/questions/10762239/mysql-enable-load-data-local-infile
+SET GLOBAL local_infile=ON;
 ```
 
 # 3. VSCode登陆
