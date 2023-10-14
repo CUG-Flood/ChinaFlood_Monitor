@@ -47,7 +47,7 @@ SELECT user, host FROM mysql.user;
 -- drop user CUG; 
 
 # CUG 为用户名，pwd为密码
-CREATE USER 'CUG'@'%' IDENTIFIED BY 'pwd';
+CREATE USER 'CUG'@'%' IDENTIFIED BY 'CUGhydro@';
 GRANT ALL PRIVILEGES ON * . * TO 'CUG'@'%';
 FLUSH PRIVILEGES;
 
@@ -56,6 +56,8 @@ SELECT user, host FROM mysql.user;
 
 -- https://stackoverflow.com/questions/10762239/mysql-enable-load-data-local-infile
 SET GLOBAL local_infile=ON;
+
+ALTER USER 'CUG'@'%' IDENTIFIED BY 'CUGhydro@';
 ```
 
 # 3. VSCode登陆

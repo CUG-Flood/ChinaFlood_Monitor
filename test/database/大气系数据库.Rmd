@@ -1,0 +1,31 @@
+```{r}
+#! /usr/bin/Rscript --no-init-file
+# Dongdong Kong ----------------------------------------------------------------
+# Copyright (c) 2022 Dongdong Kong. All rights reserved.
+```
+
+## 登录数据库
+```{r}
+devtools::load_all()
+library(Ipaper)
+library(tidymet)
+
+# source('scripts/main_pkgs.R')
+config = yaml::read_yaml("env/db_userinfo.yml")
+dbinfo = config$`remote-nas`
+
+con_mysql = open_mysql(dbinfo, 1)
+con_mariadb = open_mariadb(dbinfo, 1)
+# con
+```
+
+```{r}
+
+df = tibble::tribble(
+  ~name, ~type, ~supervisor, ~year_beg, ~year_end, 
+  "谢宇轩", "硕", "孔冬冬", 2021, NA
+)
+
+# table = tbl(con, "China_Mete2000_hourly_2020_2022")
+```
+

@@ -12,27 +12,35 @@ library(tidymet)
 
 # source('scripts/main_pkgs.R')
 config = yaml::read_yaml("env/db_userinfo.yml")
-dbinfo = config$Kong
+dbinfo = config$`remote-nas`
 
 con_mysql = open_mysql(dbinfo, 1)
 con_mariadb = open_mariadb(dbinfo, 1)
 # con
 ```
 
+```{r}
+table = tbl(con, "China_Mete2000_hourly_2020_2022")
+```
+
+
 ## 测试基础命令
 
 ```{r}
-
+df = st_met2176_hourly
 # st_met2481 = readxl::read_xlsx("st_met2481.xlsx")
 # , indexes=c("site")
 # , indexes=c("site")
-system.time({
-  copy_to(con_mysql, df, "temp01", overwrite=TRUE)
+copy_to(con_mysql, st_met2176_hourly, "st_hourly_met2176", overwrite=TRUE, temporary = FALSE)
+
+t1 = system.time({
+  copy_to(con_mysql, df, "temp01", overwrite=TRUE, temporary = FALSE)
 })
 
-system.time({
-  copy_to(con_mariadb, df, "temp02", overwrite=TRUE)
+t2 = system.time({
+  copy_to(con_mariadb, df, "temp02", overwrite=TRUE, temporary = FALSE)
 })
+
 ```
 
 

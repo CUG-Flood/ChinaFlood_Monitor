@@ -5,3 +5,5 @@ Manifest.toml
 .Rproj.user
 
 man
+DATA
+.ipynb_checkpoints

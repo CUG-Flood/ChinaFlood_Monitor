@@ -14,6 +14,16 @@ con = con_mariadb
 f = "Z:/DATA/China/ChinaMet_hourly_mete2000/data/China_Mete2000_hourly_full_2020-2022_tidy.fst"
 df = import(f)
 
+
+
+library(arrow)
+
+pq_path = "DATA/China_Mete2000_hourly_full_2020-2022_tidy"
+system.time(
+  df |> group_by(site) |> 
+    write_dataset(path = pq_path, format = "parquet", max_partitions = 1e4)
+)
+
 table = "China_Mete2000_hourly_2020_2022"
 copy_to(con, df, table, overwrite = TRUE, temporary = FALSE)
 
